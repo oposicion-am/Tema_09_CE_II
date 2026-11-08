@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Decreto 23/2018 - Fondo de Mejoras</title>
+<style>
+:root{--verde:#2f6b3a;--verde2:#e8f1e9;--tinta:#1f2a24;--gris:#6b7770;--borde:#d5ddd7;--ok:#1f7a3a;--okbg:#e4f4e8;--ko:#b3261e;--kobg:#fbe9e7;--fondo:#f6f8f6}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.5}
+.wrap{max-width:780px;margin:0 auto;padding:24px 16px 40px}
+header h1{font-size:1.25rem;margin:0 0 4px;color:var(--verde)}
+header p{margin:0;color:var(--gris);font-size:.92rem}
+.prog{display:flex;align-items:center;gap:12px;margin:22px 0 14px;font-size:.88rem;color:var(--gris)}
+.bar{flex:1;height:8px;background:#dfe6e1;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--verde);transition:width .3s}
+.card{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:22px}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:.85rem;color:var(--gris)}
+.tag{padding:2px 9px;border-radius:20px;background:var(--verde2);color:var(--verde);font-weight:bold;font-size:.78rem}
+.q{font-size:1.06rem;font-weight:bold;margin:0 0 16px;text-align:justify}
+.opt{display:flex;gap:10px;width:100%;text-align:left;background:#fff;border:1.5px solid var(--borde);border-radius:9px;padding:11px 13px;margin:0 0 9px;font:inherit;color:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--verde);background:#f7fbf8}
+.opt b{min-width:20px}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.why{margin-top:14px;padding:12px 14px;border-radius:9px;font-size:.93rem;text-align:justify;display:none}
+.why.ok{display:block;background:var(--okbg);border-left:4px solid var(--ok)}
+.why.ko{display:block;background:var(--kobg);border-left:4px solid var(--ko)}
+.actions{display:flex;justify-content:flex-end;margin-top:16px;gap:10px;flex-wrap:wrap}
+.btn{background:var(--verde);color:#fff;border:0;border-radius:8px;padding:10px 18px;font:inherit;font-weight:bold;cursor:pointer}
+.btn.sec{background:#fff;color:var(--verde);border:1.5px solid var(--verde)}
+.btn:disabled{opacity:.4;cursor:default}
+.result{text-align:center}
+.big{font-size:3rem;font-weight:bold;color:var(--verde);margin:6px 0}
+.result ul{text-align:left;padding-left:18px}
+.result li{margin-bottom:8px;text-align:justify}
+footer{margin-top:34px;text-align:center;font-size:.8rem;color:var(--gris)}
+footer a{color:var(--gris);text-decoration:underline;cursor:pointer}
+#lock{display:none;margin-top:12px}
+#lock input{padding:8px 10px;border:1px solid var(--borde);border-radius:7px;font:inherit;width:200px}
+#lockmsg{color:var(--ko);font-size:.85rem;min-height:1.2em;margin-top:6px}
+#word{display:none}
+#wordbody{background:#fff;border:1px solid var(--borde);padding:28px 34px;font-family:Arial;font-size:11pt}
+@media print{
+  body{background:#fff}
+  .noprint{display:none!important}
+  #wordbody{border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="quiz">
+    <header class="noprint">
+      <h1>TEST DE EVALUACIÓN - Decreto 23/2018: Fondo de Mejoras, Comisiones Territoriales de Mejoras y mejoras forestales en montes catalogados</h1>
+      <p>12 preguntas · una sola respuesta correcta · corrección inmediata</p>
+    </header>
+    <div class="prog noprint"><span id="cnt">1 / 12</span><div class="bar"><i id="barfill"></i></div><span id="score">0 aciertos</span></div>
+    <div class="card" id="stage"></div>
+  </div>
+
+  <div id="word">
+    <div class="actions noprint" style="justify-content:flex-start;margin-bottom:14px">
+      <button class="btn" onclick="copyWord()">Copiar para Word</button>
+      <button class="btn" onclick="window.print()">Imprimir / PDF</button>
+      <button class="btn" onclick="downloadDoc()">Descargar .doc</button>
+      <button class="btn sec" onclick="closeWord()">Volver al test</button>
+      <span id="copymsg" style="align-self:center;font-size:.85rem;color:var(--ok)"></span>
+    </div>
+    <div id="wordbody"></div>
+  </div>
+
+  <footer class="noprint" id="foot">
+    <a onclick="toggleLock()">Acceso docente</a>
+    <div id="lock">
+      <input type="password" id="pw" placeholder="Contraseña" onkeydown="if(event.key==='Enter')unlock()">
+      <button class="btn" style="padding:8px 14px" onclick="unlock()">Entrar</button>
+      <div id="lockmsg"></div>
+    </div>
+  </footer>
+</div>
+
+<script>
+const DATA = [{"q": "Según el Decreto 23/2018, el Fondo de Mejoras de los montes catalogados se define como un fondo:", "o": ["Público, de carácter extrapresupuestario y permanente, territorializado por provincias.", "Privado de las entidades locales titulares, gestionado por cada Diputación Provincial.", "Público, de carácter presupuestario y anual, territorializado por comarcas forestales.", "Público, de carácter extrapresupuestario y temporal, de ámbito regional único."], "c": 0, "w": "Art. 3.3: el Fondo de Mejoras es un fondo público y de carácter extrapresupuestario y permanente, administrado por la consejería competente en montes, y se territorializa por provincias.", "d": "Fácil"}, {"q": "De acuerdo con la Ley 3/2009 de Montes de Castilla y León, citada en el preámbulo del decreto, el porcentaje mínimo que debe ingresarse en el Fondo de Mejoras por los aprovechamientos extraordinarios derivados de incendios, plagas o vendavales es:", "o": ["El 25%.", "El 15%.", "El 30%.", "El 50%."], "c": 2, "w": "Preámbulo y art. 4.a): con carácter general se ingresa como mínimo el 15% (art. 38 Ley 43/2003), y el 30% en los aprovechamientos extraordinarios consecuencia de eventos catastróficos como incendios, plagas o vendavales.", "d": "Fácil"}, {"q": "En los montes catalogados propiedad de la Comunidad de Castilla y León, el decreto establece que:", "o": ["Se ingresará la totalidad de los ingresos en la cuenta tesorera de la Comunidad.", "Se efectuará una aportación suplementaria hasta alcanzar al menos el 50% de los importes respectivos.", "Se efectuará una aportación suplementaria hasta alcanzar al menos el 30% de los importes respectivos.", "Se ingresará el mismo porcentaje mínimo del 15%, sin aportaciones suplementarias."], "c": 1, "w": "Art. 4.b): en los montes catalogados propiedad de la Comunidad se efectuará una aportación suplementaria de forma que el porcentaje se incremente hasta alcanzar al menos el 50% de los importes respectivos.", "d": "Alto"}, {"q": "La parte de una indemnización por daños y perjuicios que NO corresponde a la función productora del monte:", "o": ["Se ingresa en un 30%, al asimilarse a los daños por eventos catastróficos.", "Se ingresa en su totalidad y queda vinculada a mejoras en el propio monte dañado.", "Se ingresa en el Fondo en el mismo porcentaje que los aprovechamientos y el resto corresponde a la entidad titular.", "Se ingresa en su totalidad en el Fondo de Mejoras y se aplica íntegramente a mejoras de interés forestal general."], "c": 3, "w": "Art. 4.c).2.º y art. 5.5: la totalidad de la indemnización que no corresponde a la función productora se ingresa en el Fondo y se aplica en su totalidad a mejoras de interés forestal general. A la parte productora solo se le aplica el porcentaje general (art. 4.c).1.º).", "d": "Alto"}, {"q": "¿A cuál de los siguientes destinos NO puede aplicarse el Fondo de Mejoras?", "o": ["A la contratación de personal en régimen laboral.", "A la redacción de proyectos técnicos y al servicio de dirección facultativa de las mejoras.", "A los costes de auditoría externa de la Comisión Territorial de Mejoras.", "A mejoras que beneficien conjuntamente a varios montes de una reserva regional de caza."], "c": 0, "w": "Art. 5.4: el Fondo no puede destinarse a la contratación de personal en régimen laboral ni al sostenimiento de personal, instalaciones o inmuebles de la consejería. Los proyectos y la dirección facultativa sí pueden sufragarse (art. 17.6), igual que la auditoría como gasto de funcionamiento (art. 14.2) y las mejoras conjuntas en reservas de caza (art. 5.6).", "d": "Medio"}, {"q": "La disposición de fondos de las cuentas de mejoras requiere:", "o": ["Firma del representante de la entidad titular y del jefe del servicio territorial.", "Doble firma mancomunada del jefe del servicio territorial y del titular de la unidad o área de gestión forestal de montes catalogados.", "Doble firma mancomunada del delegado territorial y del secretario de la Comisión.", "Firma única de la persona titular de la delegación territorial, como presidente de la Comisión."], "c": 1, "w": "Art. 7.3: la disposición se autoriza mediante doble firma mancomunada: la primera, del titular de la jefatura del servicio territorial; la segunda, del titular de la unidad o área competente en gestión forestal de montes catalogados. Ambos pueden designar suplentes.", "d": "Medio"}, {"q": "Para realizar un trasvase de fondos entre dos montes catalogados de distintas entidades titulares, con el fin de abordar mejoras en un monte sin saldo suficiente, se requiere:", "o": ["El previo acuerdo de las entidades titulares, sin intervención de la Administración.", "Únicamente el acuerdo de la Comisión Territorial de Mejoras.", "El previo acuerdo entre las entidades titulares y la conformidad del servicio territorial.", "La resolución de la dirección general, a propuesta del servicio territorial."], "c": 2, "w": "Art. 8.4: es necesario el previo acuerdo entre las entidades titulares (todas ellas si la titularidad es compartida) y, además, la conformidad del servicio territorial. Esta conformidad solo se dispensa cuando la titularidad corresponde a las mismas entidades o conjuntos de ellas.", "d": "Alto"}, {"q": "En un aprovechamiento sometido al régimen de liquidación final, si el titular no abona las cuantías del Fondo de Mejoras conforme a las liquidaciones que se van practicando, el servicio territorial podrá:", "o": ["Declarar la caducidad de la licencia y adjudicar el lote al siguiente licitador.", "Iniciar directamente la vía de apremio, sin poder paralizar el aprovechamiento.", "Disponer la paralización del aprovechamiento y la prohibición de extracción de nuevos productos.", "Incautar la garantía técnica e integrarla en el Fondo de Mejoras, sin otra medida."], "c": 2, "w": "Art. 9.3: en los aprovechamientos con liquidación final, el servicio territorial puede disponer la paralización del aprovechamiento y prohibir la extracción de nuevos productos mientras no se abonen las cuantías según las liquidaciones practicadas.", "d": "Alto"}, {"q": "La Presidencia de la Comisión Territorial de Mejoras corresponde a:", "o": ["El representante de la entidad titular con mayor superficie de montes catalogados.", "La persona titular de la jefatura del servicio territorial competente en montes.", "La persona titular de la dirección general competente en montes.", "La persona titular de la delegación territorial de la Junta de Castilla y León."], "c": 3, "w": "Art. 11.1.a): la Presidencia corresponde al titular de la delegación territorial. La Vicepresidencia corresponde al titular de la jefatura del servicio territorial competente en montes (art. 11.1.b).", "d": "Fácil"}, {"q": "La parte del Fondo de Mejoras destinada a los gastos de funcionamiento de cada Comisión Territorial de Mejoras:", "o": ["No podrá exceder del 10% de los ingresos.", "No podrá exceder del 15% de los ingresos.", "La fija libremente la Comisión cada año, sin límite.", "No podrá exceder del 5% de los ingresos."], "c": 3, "w": "Art. 14.1: de acuerdo con el art. 108 de la Ley 3/2009, para los gastos de funcionamiento de cada Comisión se destina una parte que no puede exceder del 5% de los ingresos. Se aplica igual sobre los ingresos de cada monte de la provincia (art. 14.3).", "d": "Fácil"}, {"q": "Cuando el servicio territorial comunica a las entidades titulares las propuestas de mejoras para el Plan Anual, estas disponen de un plazo para presentar alegaciones o nuevas propuestas de:", "o": ["10 días; si no presentan alegaciones, se entiende que prestan su conformidad.", "15 días; si no presentan alegaciones, se entiende que las rechazan.", "10 días; si no presentan alegaciones, el servicio territorial debe requerirlas de nuevo.", "Un mes; si no presentan alegaciones, decide la Comisión."], "c": 0, "w": "Art. 16.3: antes del 20 de febrero el servicio territorial comunica a las entidades el extracto de cuentas y las propuestas de mejoras, y les concede 10 días para alegar. Pasado el plazo sin alegaciones, se entiende que la entidad presta su conformidad.", "d": "Medio"}, {"q": "Cuando la ejecución de una mejora corresponde a la entidad titular del monte, esta debe comunicar al servicio territorial la previsión de su inicio con una antelación mínima de:", "o": ["15 días.", "10 días.", "5 días.", "Un mes."], "c": 1, "w": "Art. 19.2: para facilitar la inspección, la entidad titular que ejecuta las mejoras debe comunicar al servicio territorial la previsión de inicio con al menos 10 días de antelación. La dirección e inspección corresponden siempre al servicio territorial (art. 19.1).", "d": "Medio"}];
+const ENC = {"s": "FrcVfLVCEcT5uKiIQ6BLDQ==", "i": "2totCZmpLj5hZ5Gm", "c": "AWh6/s6YJqVTII72hWeigJxfUvOiXBJ3RYeJoLXb752B94h7X9+Qv5IuaoU8Wh/y6z3A6QwDErwygDB1QZZbQodrfBBAfFIbuJ2IcBXIeBgQfUwM3LMd416eQZatb9CfLQsqB5hmX4gje/nlTHWjCK9RCxTt+EE4VDH6G88hRYRZMGqyQurpd5yMwpkGdGl8dNbuOQ7g4d7p+NBIYG1ojlKN/Fj9RlPz/mF8SiD04D0Mphz+Vy4U2ZJNGRWWxzLOpqNg3TaHBEP0tYZfXFAKMMxIW/3IUpFwgzp67jlU4TWbHbbZ60Yr5pcpINHNtM/PidO4GfRG42QkNLgI8n+SQku8Ri4Qz1Dl5zfs9PH2N+6fnIHxOCWVAkHV69Sv9nFaq7XRo5mdO7qoySoUkpnqT8brpddHM7lPzYWpiiiYwgjSDDUjGR2UYTIxzslYBrBPvJrAs8xhHjdXFCSs9bz241HYdId6JNXU0/j3MRpZMo/4BaCHaWLW9A9RzPBEgE8I4iOZE8FwGif+HG64FCAWslfOThjo+ZR77hFXKOnEsX6hWq86VBxaqhI98WlU6/ngBd2fYW7WQIDsNN7elXtkO+II/aLLKF1cLAGEafKkEqBa08DBBGOySUulTDiEmUv3+ctTRw8weHnVxLTTDhv+21nCFA2IJeMarR52ZKXS14pQJH+VDJN6BCKVRA2pDMa2MKd2zschZZCwBpfR7D0U/m/7Dp15z7hu19OF75x+d6trH3PGgf4Y47CWBTriZbuKLyFsD9M4tsFPamL3YZz2lPiJUKUCzuBlSaJKNHae7R03qpLgemVF9T46Pdsm8mEXU9+HcikOCTiP3IMeVfbZbhGfuoXr3P67GnKu2mKVu95y+r1D8+a3qwG7mQTCPIhFBOYnKy7nL4/qJ3vdUp4nj+dMlLxSw9daoQhfHmz7T0bNiaVEnlJMGLPHUe9sHcs8Pw3QK/mzPMFin+A2F7aFW8xDps65Js0HI3MP4bRF1tFVi6Tr66eDLk+D1phA6SXiO67D4NVLSX3auqxjrbSb1Vk4yk1UlTPR1ugVBoAzBQ+dp8fcvgceSQErbBCjlYHLQG4Xoed+DNU/47z0PUHQ+oIetDVU5UJcOgmKC+Y8bP8z0A94MXWjZKbfLX2NjaRFU1IpWtolWPZTkB6QLDzFcLFT0WNf516dBabVt4Ce03Cc9YnN3QjSd+wSs6YChJolpwZneZteQIPH3SXoByvp6wvuOF2/bcI2F/BDDL83CHGdnLURBLwEejBfrgMsVcRlefH1Amhob/v2uU1nzlXevv6PUmaCr+PEXZDUKwlEwlnO1OqZsnqvpEX96xTJMTXvfKzpgmuQoU5mseKDifV/lPUvuNOKuRSBgQWuUxFf5mzvOaIjHBQAcgsr9vXETMslmH4Qy5yMmwCMPnoFZOuvKmxab47wlzQ7b6VsIHpAJQYvYML8PubCuR3FEImi7AiyuFeD93F/vST/RQ78Susk0auaxcpEwSISlFI4/9Dgsy1fdcDgE8QMkHyf7wIqasFGb/nfbHUuFtbByfgl7TdXKayFSRBbvcCtMjq8/e1XAFYUm+Qo8AmtNCedEXHaX2+xSgVGXxpqydDeK5WgszMyVT9sV0pu0Pug1F0R4oDCUYF6TzbNEx75GQykerhvO4X5l3VhmZ7YM4rObXmC1LhQLDeV7pYguiQlaNx0HzRTndzTcMVjvjA9yLsIjepm76GVWkgEf5rnuxjz0VZNkny48Da+mVIy47Hbs3msly/tDrhpuleRuoAMZSgJfUZo1WaHEKTPvRonj8CVCIJUlA1NlMpY7bycKqrHNWAYEALqmbZiiW+n4yOOitEt9o6qonN8W3/q1jMZ1jXqPYp86cCQ1QD5B6hKHAWI3wCUoe0YmusdYSdtYmo21XO63EowJKvmd5NEeHyafRdk3/AYKI8SYj/NqBu6nCEt1ujfEr0dVqF1GglTebZpECdEZ3DizVzn/SpYVaalhdCuvCXofEi+B42Dnif85avYO8DdTE4i3IwqewSVlPRpmOp7gFWQR+ZQp00AZHmacEqCFES1Lolpm/GELBcOyxNdPT+fV18bjjpJG46v5611qtDFX6nhN/sgzXOWcTENZznTrsPc6lfZgfxJHmL9Cppgo0fFpJtxLypHzJio/txrVSFvu6br089FKjEaprfpmQCwLQClNKOdi+MdnKpUN3g8fNGCM12X20rZeGGmrFYk9eRDf8II461sWbJW/6iPerrBjjY/J9SmOhOLPmpHdVGOshgfNfpM7k0QmtLceueGtjxKiRLqVCtw9EPpOMhjsiqxomH+iO1HK7CMwCajDENMyUkWwmoAmrp9S61TCRZ3cJHdYv0CkJCfTxcDUx1NonSMeCmZtwqnDwwLubNP+brOaFvN0UlEcHA+BYjQgsH+oXCI1fZWfhjR1snvVEVHfEZYhhuNUt/apPAEyU1FdxHZUvdExSDCvBHTZ0jAQWLNHaDph3doypqNRXkKa81iYQ8xAquQEOPich/EifsjSp3b3D+oafHkR+ggQdTmMnQh6e8/skaJiU7+957oldesIyxWYbq+pQ0ZTxcd5AcGqprbanOfvoHL9CDc7FQU0Efmk3OJ8zFiDJpA8gKG40IDRaTqLpkTbGUy9Om/x7acpyH8/Pkk/Z4nbe6TDWniLTl0TYLGHD+Th36VsUNdLazW2oQq48RtvxLYgFmw7lL0PdJQFI0xmVC2Yx5u2L7/wQKKcZXEfKacoxBKIL/qypqhE+lQNzSkqRSLi4kN0B5JrhDUeo9BIiqUmrD886HgDKLlxem0DdvibiIYMupFq754ZqNNbu+09GXILSFCkiGQb1LzwGc/RD8/MoFi0klw4Vca7YaWVaJdiBpowCb7DQ1FvMwy/KTqteASFQlFUPcy6fJw4ZpfMgT6slM+M7L5lkOE6QICetqkRmiXJmfKyZpUDCZpjNW2UaewGhEX8J0lXi6DfUaueJCKLEeCgOL9c0Hyo84RpYttaa21UoxgKG1F0p21XpRJV/4216xbakaMrZrVHPRgPIVF3e7gTMRuEM54oLBKz43XQTeRb51F3UD/6typ5zP4qyGH7WEFM7ZP/4iy/7wRwm/G/4n8+DaJoHFh4m6XwOYpuBeg61GmaTWOhn9PHBnUXEugks+kVSVdpDsX5HiOpVIyQ5JDK2tUGr/vigGAsgiQvDWyNSno8XhyvO4+53VJdZ7MEzJN5Je+WdNqxuvaC0XKyCXpnUv9Ur7hL4zQfWbRRr9S9V0CT2l1qoiIzwwb1Fweovo4w+47yp1Pj0jMYsnYSDwxmTPhWcJZNi4Z5Fe1cl5CTgdKVfysARQlKKizzEVY1Z0NII7We5NVyHQL5OaIFjXS540llVRkjqqtXSKDdckmGerBDssxoijIC486kgGFDGpDrsBAX+MLMTInWYwE6nnRCj0Zou8xv35jzSzaDYlzoN7ZF8903HhU8ADUN50j/fC6BqBFHfN4XBGrJL4jM81VuuKBVKQBFoRdGrGaqzaIUCV5KEYTo/MxlyhpDQLavpR4S3aI+Pje9aB/OjLP0Km8YjOxdE51Q1QAKHR/pjDl5LtdrfC6SzdXHPv8GMW4Ie3SHn1SY0yg2zxkHtkLWQLod2tIT44piUaWH8OCOdMryYC/GKm7RsX89qQWopdjVYLsFKq0uW4FRm9lLNscds5c2QTJQog6/JyvfrRvXC+beO4k3emgLMIX9dqJUF87x6ZUmoDCHtLFt25pj38TFmND9T2XuIUvUBzhuPMTbArZPhaMjartGHL0xavClrmJypZ90W6vt6ssfP2yvBBRxka7ajoR+bnkUlXpWZPzZqdBssNbZKR64GP0QfaKkUqxv9hnzEqQCDrSDjsFOr3HIu9rS4gcd+m4+usmf010FcKgxndcqRABNzJsS0EMZTuyR1cGfr2NZmnWQs6d0kaB1JCd0ip2yEJwxisxZbBS1kk5xTTnxDQmZIi7hRj4wYNopdaFdRyVz1JdMFqHu20JVplGUUhprPgOskDADsG9b7eXfdvyxOE91slXGeuZLUSFtGZD+DExFgGhOa5j3e/7DoJdpYho04tLtPlMyrwEl97IWuZWeVJcchREtcu7kloTo0FvJOVIj+cEqki4kTi7jDC6oCqDMR/DG5KAqSMc5izu5lK79fSUjqEGJb7xa1siLXYgmlUVcOhMqduMNDsbA1/y1e9fS7vD3lP+9dnyMb/tkd/elimkbkQFMyRWiJHZOIFc7W2BFutplrAyF/z+4D0EcOrDio/YdQ0uEjJYolzkscz/T/IjuslUSFXvS2/ZNptsTpk/SYdTZHFwSnlP+0uWg9TzwkF9oL+mU09jgcZKn2xlePAvdy0xHPHaK21hXobWWbLsVfmaeXy4gLE+T0IA6QnsV6GGoUldniSqOAfJqZWalKwsFq2qq5K7LRiWUGteYVjGgdUJ2pB08zIgywZbEG/IAriFALH7fxxromUwMXgyVVjduRRXdU6LmF8TkpgJ5VB/bkm41ercXREq+qN/aXsxENWtGGsQX1i61+mNtcbih05EFwCn0DjhYRR6elqYgKD24tl9o04AkuC4V27vIZy5vZhcipaFzhi0pL9b/VmAuiJzr1BB5A17Rv5a3GFcDnMGZrVkUMTJv7CmzhOg28j3J3BnTj6XTTt317w0hLQKI5hUCKSe9WUoqraj3KxsO6k9zshiNqVanPaPN3IVa53PuA/v+Ptg6pJxkb0/ZrSLqCiGgu+ABXW9j/HfEBut3fd+bbVLTpES4hbP9yhjACO7zKYZ9j4VqdzWEe1SgmrDGlqEZ3ObCcXVIJ2MbCnMLXG5rG6DcOMwHf24xyqj1xtYeVATlYcLi6SVAnOmC7SLF443T0gV+7u0IenXf+AMYPF6lw+34iTS0EkPpy+wDDFG5ZDEUXGOYOPnglByhTZhJCpqG5+T7Afg2eCQvk8x2O85ftKcMD72oc5ecXhw+2lN6WzHkHn5enpu/cEffVamSow3UC4v+/XCQHelK2y6XwxFfVKZievnLVbnyX9kVhpZpqKuYC+/DJP2JINZnbFxJci3zGCW8mMFdM3W5RBpur+hc/g02OLsXSkd9D7ZiZdwq23yQyRtgkjIIfaFaA3Gdz8Njv/pwMW40iSz2vvsenjH5gSiNI4hl+9n4zX/Qxlfvb2mVUe6oJ7V8DlXwh82VtYQUc2z9CWHyRvfdfBGqS77rFXBAqY0EJSRlexOUJSxDM0FJuHSFvlhpTiQb1PC0EOqlC+vlqa/PxhdYdZ1SFMdCrWCrm25+TL4gWIpmdH1/cT6kfuDziu0sUQ9BStyXj7KcwNuDXs6yq43qCD7k3I7qP3IcDAmW8vGnzAiKdDAAdpwiIcVnOrnJ7PDEJ76jNDDJikQjaHKYx2Lz9oidmLyaezPGNK09w+vpgA3N0QKABH2s/Hk37hQ0Rfooo+YWgGrdJfQt6q3eH8zYzQRnhD+g7YxGNDxzuyU73s90DMXY2LOy1rkYcGLeGdAS+4pPo2aiMTxEmoKWgNUBSnA5y4j+h3e9aWafu0cvRAU5rhoDN81VhtdDeOXpp+mya6CxzUqW6705Ih0BaT/lEZZifru1MJFfvHGAsRkfNFfUehagnKQbMalGe/8BTJsbjOLHDIsbd+C26OVw6ROzohyXGpRmYyNBZBVeeAWvb51bQeCgpse1oDDB6rzMszkUhTeSMieCrU5Sw6JL2f2LmMgrp0FHcsJsY7w9gJ3LeryQTj7WZpUMj/Kf7sAW+nEQPMGmcLjdbtjeo2md7cNezvHR7jbZI3RoCSTdusvANCYod1afoJTtnepIsnFPPwJ3cuWwUnmIKO323fNtT/aYCjFt6oUY7+kQOT3zmt0IcH68ZhmLKcGmHR/VL6oGIq4k2hbrOOZq31h5M9X8kyCKUsNlHVAGndQbkfxWYuupwGFvPCYMTBCo/QaHlmBhjRoShKROT2NZ8IgGFqPK3E7RJryLWb1EgbrDbG+FMv9T6XPmC/HChNEHNiqCWMTJbHTnXbQ19mgfrqrNfpZ50Z7m3qGjbbqjY7CKqyHbRR917ZgVS09zvb+vatC8EChmNhSkjCq2JU5oyASf3dBi8UkA8rdrrHdUtQdj1bxdDAFhuNuQ5MqceaURDuBoDqgXAYiljaCkmMYK9jZY8Nor8vG3xNcuTBsQc/2bQ1H+FZZqINrG1djhzHVCRLNJzWzz6mCbvDnBZKdcFsB/HNaoc1df5RWqjb7F461mSyNxWBwDAl49DSgiuCt+FBb7qDiyAQifdWTkERAuB6cD6xvoFS02qBQYgR71ckGLV4CujkRrV6+BidbVl9ka74wUGg9JOsZSIDvFlfd5o2wDjkbMyIXZ6quFsCLzsf+33kDG2ODl0kPX4U0OARaemcGGyKikZpcHAAUFAteqQRp409mIIw0yWyoUY9aI/J0xMME841Fi6CjFKeW9SsQl44ugNHz9NvQOtYVjNAQZBKSGhV3ZXNTXRLG9PDCvupi2F3dS3xJx4NAGaLsf21nElEWSz9McICbBYqORh6TCA8QVw6/OK8xT7Ah0AB7jwo2LPW7CPyEo/8KPDh8rj9qlZnnhgyh+oLPej7xemYnXPISTir52Yjf53r7/adhLjqoPLTWq3YhIo1ISEkArOCxsxFpyhcDTtRaic3dXGtasHPSq2Ky9uEV+h3rc4INMaBGOd0Ba0qrdiDfPsJpPXOtTSun6kJkN7URYRzXlQZMz8IUmhjjMrV680aop7Vl7+cuOLU40+6hBjwvdr8Ybb6ba+3B6FcRhwVR3zOPsGmj4GoBziXaMrHgnj0Zi4pJ5LmQHlNAmXzHRvjY2NJb5vkbZpmGmsMpBWR9zrwyQ18mvHmW8DietXkN5i64RG1TWo/tRJ6/GuRSHXKESW0JS+6YlDpxfhWAHYwolvvvLgbVgtL69I6KRwcJY/rccGjdkZgIY/hZUBLZDSnDoSQy6MX5dv5DmP3YpuFDLw2cSUFE+X4atv05I7tG1BcjCrW9nmEWliJ0NRl4p2+dR/BC6z/9u11SkIMUXh31OMigiDMQMg4YuATBwgWG2abHblkCyZ+XgwfJ+gD/0ydWkobBnamXPoHM+vFASRJeyRBGlbpyElUO6Dn1n0PFUOyLeBLusAqiRNfxUGAGB8ieg0+/zWOHcf8lER/l8aT1uXHqKqAtYb9Zt9vRGvTjIhuLlQhpd6w8RpZ9uT+Esj4MAv/JI64t6VvPLAijDEGWkREhhNfb4z5ww4f99nFNYMkzzvwtkurEt7n6CeMaXU75vISL82SXu7eRjZZjx9IjvL5qv3EAMEOZn/jOlK1oqrlujVApLLpWqQ7Hu0kETWuRjE6PfUTpqFk9TvaXZD7Htf4gWtcAjjXeQr2GoTa13IyfVVo57Nv4yvpmfsGCpLsSNvxh6oUiPNP1VJCMkI3j3z5eDtF1u46rNHo5eC9vHwZwe/cGXGFZTGehpkGg9mu4i1DIKSmw6W86GsP5UGA6fZvceES++e2Fjakfz0DP8YkaE2XW8gvztdVZqv5b/hCxbu3Y76L0Iq21Jbwy4Ud1rFivaQve1NdnnmvWXk38/3NfYtXm/I200mOWJgP3PiOH2Dv5P/yDq2kGa3JaLYXtERPRyHC5UvURDEuWtlcJZ+cG8cLTfZlrhfkPBLnzV6wOqGwTSn8oJshZy9G3k4LdPHpJSxebTSDTQ+IHENLpsWnxMLyH3l5lRFBk0YsW7IYNV4TTNZ8E+W53SjYNwLp8XoFjTSCXTJZE0ED5MtLS1TeeSfwkpoxIE+3IHz1ro1gidixiroRRMvUPs4ZO9uMkb/U/fl6HjDqKtVm7yNOgv0ZRaZO1sgVRD2Z3NBnfkOmWyhgyzcCwkaaCGkAGYKBD/lngffzIIwmi6oXaa18Cb2pMPikM27XsvTSo/X6hhtTALUaBNGcuKQnl2zuexJHK2nomLl+d333pO81nHXbp3t5vJP3pjWr0BQOLkP2iyt0nDNkyXt96L6MMhAEOmLciRuN6ab2IKCLicZcancoTAMvog8fkHcrohPqqZKHVFCmdatilEDwU3HnGT3a91BKmDXQ2oZ5+2G+a5il3+YAeoEgoML1emRwa1Hu2tmngLN9KhoesMQcdERobDxNY01ytEiMOk98sWwEDGA8I3oCUrXE5q6rKN1QqIKJ9l22ZJT5IC7hR7Y6GZ66OVir6DtTfNxiC/vF3yVBPa313UMxBofZ5Rq1qOVdaeDkNWYlUMlLuPoRCP/pxLP+Lv9uUfkIxPrpetIwGzZ56NcTU0lwdwPcrcTlhUtaNxKPcqI1jQ6iB0oxpS4ugTN8T2UHKDMh66J13Lj0IN0OqNLriO2YZeKiB3wXHgQg2HbVrKiIcjIx1s3noJR+18IMYBZGsbwVrdMT281FCfkfTmbI88XU9EOH54i62An2vymJUfUFGLAj+FgVu/jl9rlxAQEnG9XfdN7juaDmx9+nil84p07Varniw4zPb+tAEyWmRnJqrUf7xKSEt2hwUwVpinX6dm0cXLMAPka8Ln79PnBLJ/60WzcetgydMjNHag0xsUj7Rx0L6a0mT1ofL96A+8gMf8wwX/zXrX/XEBruNay20PRjIVDzXilfENYQ+IDQe/OfqbeCAz5Xi0QXo+uJPp9VnkyTa9s8TeckOipy1PSvcTRMlmVgc/w5tFp/ujP7+ta0HIIbF7Ydq+YG1+RJjz7bzelo6kCtI7CIBosrMbqbtMPdXUmLv8krHTeZe/Wx103I3cgzV+fFiEqGqjpFj387TWYdeLsFsJniRKqpwddyA3O6f7E+TmwlcwkcbHvksYV5bEINHi1m+E6JhVt7/CYG/s6HbKnfzypJpbjANWym66qakoVvE4Jj/cWEmOXlC/n11PaSxG0wW4ezeVFWn1dnuj4A1gl06bFRuZ6FUB9MGK2fGZ1NWmdZMTT0uqZCu57PWBDoLdEedueU/ZFik2Sz082SCY5LGAsw7/LMCQolnpl3OGtRhx+a6L8PYGV//jP9gvVZLzV4VNFuRfhNJTZxwdTeNz2SxNAQ0PN7G8OhcgIL+WgbVss/jJYB90VjGzo5zgKcd2h336PojIU33fZeAoWNb0xfFpY62b3UawTxKw9asWzkJeFT9zAvscXNCKeGK63h5O1tuQY4Je1dQnY9V10AsSlAQkFr6X6ME01x9IBNyNKYgJQrQfdfErhFM+oLx6YuPmpG/0pdNBIl8uepI/d6v/mDIUzZTVNTdCiQgI9ddjrM9E+dQqA57h8YrqyF8xuXVQHoIeYnEMnibxTD3kg6Cq5ApfBqukZb6JhOjsH1lBX64mIqw9r5cbyPmojTl77Usetkwo0v8fTqfzyZIkWY8dpzaeqK7uBAcKlN240esZiSIFu4Nh75MoseS80WIZmDtSlpvmyM1ujjEnclOWc9MZWa42F31PqQhrm/ePVF6OESFGaILL+uPE3lwbvDuccdYI9DScwlnZ9DVCq0KUJzRrvxqOrt3lPiOiTNZE7T6uLHt8aFBXlxEA/xquUJUKTYF78i3JkhgAQdlk3YYtwtSBN+H9XhkV3s0wpdh6hR6d7fzABg2x9e31meih/EsQiA01aMSAP+iXLaUW47Q+NxfHtnmfN4iFZsPVhW4an1bPIqe+NA62rRL3WurGK9/aKuszWqFT6Br9vVJx61gmm0rDOe5nTO3BdxWxbaOZLF5EJ+Ip2auqYdAALxMayp6/sIyfQBoVS1jBHzMRHuCS8Z0r0i74KaKdFuftyIQAPZm6Bn9CO/7kOPLyupXXyVOr/mu/Qhuxgc6v9U6u634Bc7WAwV6ByW/7cy4ez4vaP5ZVA2l17Wm4VByP1az4ECGwVWtWanMVwu7+m8NBLLteOBxyApOHYdhpISziFT2HXvLZQUbS1pDOjC/x5AScG6LP+fnO/kDnp3nKnrpzgrEwrYGvPuowVxLAONLPrcDFQfP4Sd3bKCILBj374QI6cwcXTGKHXepUSbHSlq8CKxiwtskx+Br7dJlFw7LeaZRQL8IjAzbz6T1N6idk+UMRyx3bXbIXOK1cUEHZLXnZ9xiRyf92BrzaoqQNLNQoVocJY9hImsI8yzxNhoE/xCNTNumKLJQLuWBf3TCM0J3YXL0ikNSZ1vmosZNx/7cSKMnUZIWXLVjo3WMCgTNxV0cLA+zElQmsdG2XEdmrgzJerrxw3oLhb73PnABRfYQY+Ersf1ryVnNH8XZWF3MqnJC3IQjYdqFurntZ7YKKknqeaMO6WCnOw4noWAhjtrAJ/lfp3pHeLDrIcB30hQDHrFTW0Qc2I/c8VkFDohvasYUZEh3eXFzeWTFWp7CDvMT687QycnkuYZwhcG39IwUDPcFRgenBP1LSfsB+Ij22hdT9N0rcOr1SEsKQBQIZfeWzA9DZ6G/lyjGei/UQjIIyejMfcxaPvIW+a5DJnmJDPHQL4+t2KrtR3YST53PpU8rGJtwwzv7BeiHb9/pY7H0JU3Lro1ICT7RQDSIEZXcmf7Hcf7j95LY8nOQ7C8R1wYpFtRLZmjo0tiDp4rmr2B5UfZXe3pxEQZdtGN+XM/o6+MYuLqMLExaBJrzQIyVspiBv1mMN9RoK6OAe7phrGy4iE8qsPMoUQkjNTvq0XmeC6X4P/XxdQeQ04AtZVcJjFaJ1uBmCf+Td98dckJ17lf69tnk5DwQ0lBBzhnz/XKmhoAVyluZ4b/jTMXpAYVEzdRi1Ivh1/DQYSzduYEx6scHTPYOGLy8mnTwr9T4To5Xse056siWYLbxqtjxZ0wS7OEdvGKmeU7xJKhoH7XJdG34KRMCe2j7cVe67UEBdGy8BsKIyPEYxEh9vs35Td/HztaYDZj+xgwSL96F70niIVQ+j1eX+Kr6AyPqVDRGhJ8w5ia6Fgu/P2r5ZmkXOUsU60yhbliiFQG7EUunfgCcMK4vcmuiul+pObRNvBJd7PCgplf8xhvMRfCrfYW5P1FOWfwhHdb0QraV2rtHRW5T4NKxwX3aiPebNRASrtZPCuE5e5+w2pkbcKd2ywcBZEcRXE/gjZ3X0TbQxNAFWO8R1EKORfXLeaSpHSU442SARfiwEO4/WVlQOQovETMEhvcMUT++i37mA7dzI8xnQAZ6nDJILjFWmaUUHGOo7safXyUMXuUs6OAOXNautGWdbBJWcye7J2hTLTjG+UyIc7S4Gr5za8NOn4asjqN/QJSwnQY5QKf1Tqkd6v3XzD8IVrAnu8dLsWIK8dJG4IJJ94hu5d/Npq3rGWPhcYQ81l3BQEsPtAPhfdqGKKqCgJJuHOmZgOeVOoFL6GTBRuxfhhCW/o6MweM4bMwzYow/ZNtfOOZOBM51nQ5qwdATi4A/iGI2IFOFLmZ+D7woEWPrnZJXa0xvKZQJWMvq4gtzzANzQ0yjV6o4jwAyUL73bhiKQtDWq01USI759RlfVLj41mjp9jRR9+WKThNKe9W/cle6slUoOD2Epu+4j37ZGJg9tgiD/vjncur7L/hlS7gdpEjjSDUnq2Pq1sx4shxnbzM/ntbOL0u4c+xPzHsPJOIY57Stq3riIYNZ1BrlLhl/rRXqLMUNIjJzafBMkGJn/9hyHqAAaBljpC3hrPSe0Ellb54w7AU791VtM7FTTWeVwtf62Ott3BDY8+4hqaBPXw0YB6gnYJXmAGNtwnZq130gEX5q6gO3Os3wqTgazelFEW4FNzZixeDtwaYCrzR3Tm4O0ooOVkmcVve2Xwj+0m5I01aqrVoQqhTHXXlnFBw5moHX7Lu9NkObbIiZrgqiaHBA6+Y5JkSTXHihw6+MdLI18u3amZlkYO6sEQIBUzL1W6Mq2TM5AwBL6+x6ZD/f+GUuWU87TF3UGk8zjJEC7VJ10uoeVPOaBx3dwBMvrN1F2VQ5T5YOl0SIXNZRS0yAuG2TAND+yyD7NAYA26mTT0apKoBWywQoxw/1XENKWP/alBDLFkc1h5BLximMqClluyVZr8ksEHywtNkCKic9YKJ6LU9PhD2vGGD1l/9RWEp1xXfDZQmo27rJsv5hR6hJ3n8HV8xfR60Ikux0yrJgQXStLQuSrDpFlAc3IP0T/q059qjLhE5mJaAuDWNns2g/O/aF6siUuHqLLb0n4aGoiSNOrhzaiKokaSKY54eRrDXKn07rpQxk7V7M0luEi8sn1JjmLdPiq3vp7eb2usYedG5Ya2WIN3uDQ/NxWwZv7L4Zz0F7nt30xbR7FCeB8RAIqULCgChFM4ej00+b5x+N8zBUSBs7UBtscL8wayRxYVUQfo5wEyAE+U518Qia4EKxaqCL+s3o2k4OvT/d4lNXXtEpc4IIraDJ0H28zznBelCQsjZLvFr2mcBEUN39BudYr/tZsdNC4Dyz0LoSlL+VBlnbvyrcVa9Iylw/av9TQUzt2k3b22v27fht422XX7+9oCADan7mdhUi6e6uJFzRuOnL1TLka/7aqnRTmshemznyPHdJQ+Ckhjc+54jhk9VjV69yovMKJCCMa8PEo7sFKDlHDMrCWqfCh0Ry0YStTNhEyipiI0qHiePwWVYfSJHknoL3HaQQNPkbgfOMdsCe9W8//m+EW7J8Q3uV05ZMJrxeGUCul6CibQug2DArFbSAPQiFNsgArg1oaC2qZ6HNgad5GIdrJdtqMAkeYy6eUCVdVpBBUDSMmcc52rR+s3BMCvfWh9vrZCOzBdSM74+7FjIhotNatQnbiiu5D8atMMRYSDW4OSSYghV5WdgAmNo+foA24SSbnz1qLvKXBOHAKiQXLgQpxtPTw9usO86GbAO5gY/0f5ZfCkvt4it4stPNw4UoQegWoknemtOunphcOh1eIN3aZLXKYibtp7QrWRzwEvFoUeslWcx25RMkAGKwj5dNEhD7/ZRwuutLpfZHKENdhYda/UPK5/WtTZ/ySShsu8vizknt4fVoylbCySfAOe7G8UMTPXbTkv68VcEQBa/ghcG7zBmDjQDHaboZAc1R8pTTyZ6f6P/2Jj+p8tMBlHbuKKHWIMqS/mDLElgBQkYYob1JAElXiGbJgX/sy0qhQYYM+49cC8EV2pwNERwaeOo5+Q+XD2fjw5t5A6llpXEDZBCVJSypMQlOkP5dpW52voUVfbwyzNYiWTH94xLarwJtGcIHxxgE/N08r4JG6i4ahSE7akgld4R5zccYQafQls/rlr4rFlcJFkrIEz6DJF5bONxQgkhf5x+BBiNwkGx/GnlD6uCOpkuCV0nbBBdArJRrcc2ZKnEMZmYaeAvTJyeLHN9RaF6RT5+ASAvB08yl99L3pDvGjAlRFP/Xqe1QOjsLYSQfODdksryMNUpEnb2VYCTXM40GwWtJAzYUDSsY6RJ23HPnOha+3o3JD4r/TFRRmlHhCbh6mhg+DgUv8cn1zTlTBfx82Y/Xx7smf4IODxSsFcl5K054XzyS8XA24DnhivNMqVSdepO+gEdQPZZ0PLo7DiJxeZMVWfSe6rQEdXCwqLViw0J8mibx6h8OkAUWoY6HhOuW5utpRQOH/Zngjn8rc7GfyzYZca/N0b1rErtYAhRCpaG2+yJez4CPLu6Ib7QrHwrMKie23pG0elXvhbOy9y7/HVompKDerzMrYoqeXRB1sqIBjqlXzFqB7IeYyajag6WEfWC7Ksm14TePzIXi34/SEbb341xchfu9AtI2klN3qR1knUDzZkGD0Xs/1+eU+c52x74QyTibSkelQZkxehmisSu1s55+G3whAwJeOTkHM+QAguaOTOmCgGAlT+f30TO9U9oTyfrm6XLLq7bZBbvYizxqSddNWltjjH0LWqejs+ECR50TATF3LEmXMqrSy/8/Jc9RfO7ACKv3LPl7tqs2UpAmkvT6t0H5LlTRLf1HYHNDinJZAifdRNqq/62xZ/3rt2xc6iu2/cf8aFAiOkcy7/opBFIBxQglvJeI1om44iFv3/lZs9j4Ak4N6xZ2lzj1wwuqvq3ur+dzu/o/h1OKa8zzW3nHLkC9+y7/0PP6IDfYSiIXfV6NZAehX7lo/nMX2B2S6viS2/ZdHhu1IAb9Wa5+b9pGYV13yWBHplNfZ7p1RjdDTLXn+CDWh/V9mbMAELOWy25Dy2RM6TbFrTueUk22n8rsKvQHXxMe84etR+Du6zp1tklD6TWzPz1dSpR3T7Gb67NLTPpyaEFhbv/Gbenk1mDft+So1mdMIvw/mgIyHMVrcoRuW7tjmmTTZD5JK1pLzPmq0yRVl/oH0ddGhYSpg2FojrqqGN8R9CIHj2tpleNtrsQEeAExeUZcKYWoVcKmBOdr25fVF8LIWIYANDs+bWvPgVcdqv48lSFd+9xXPHSwRbaXLF86/ZqWBfCNxSbdz729xfv6eziYlIktCk49u7bQuzMip9CCyYxBnaeh/r1MYsXtYOmcNbPFDLi2bwYSuqFC/4iU4zdmcd1CAQIYBddADxq4l4oIANJ4Yx85BTZGv6eccXDec6rbaaF16mS/ByOPMLyq8Hl97PtecetJonP/IFJP/4hMtU8yeom+zPDzx/agyWiXwTgjbmWMOV610I8/xyS+u2gD60y/G4DphM9AO+Fl0AUiwtaM/5YjTAjx9/n6SM31lthghce2jPEhPkhw0RTeNXNwmLaYgryFzypqAh0BzzFXiIA9hwU8UWnfYf1abjVe7ej1/12A6IdfoohJJpYe+/i/LHTkTodTrca9z4D4ysPFP2xTQEG/l5aLWo2x8N8NjR724CImud4uPTjV3fnnFHbQ/BgJiHhhSn5Ddk9ilEofaGO9wrSQz+DynUjEG4FAVoRonlasHl+mXJICE47R/20f6U6kJ3p/fedV3TDluGogJEqmLCagF3O1BbYsJBZxzZvaIiKZ7YBOwJrcqUwoksW+iWQGxWop8XjCJZr3xXb0BjDP5GP9kNwoxu1AHt9a8wJ24XM93ifIryfqLkZv1qaun/9TKab3o221SoKof5M/aDUWZJXUO2ORAvueSuIAzOWw5Cy/yLKF4OI/jjNI5aDWmznxkrRKwgXA1nYxgF/3OBgHoEKkMyItu4+J3pswjwsU9NBddXkVPPkYduM8gktX8xgGDFwjbeXYd36kpOG/jbDID2FyBlwUgHzrKELBtnYSgaFWHNCTeHoOyJyAzxp0skD/IJA9IZdFGxfhVGdkqTxf7LLD/40ef/xbkWR5owOHxAOhh0LOCvfgh+1nIy5/3FSggHCNt101ew/boczOeyJwGMwnDf1vFngtYgbyajadsVlsosu0MXfj1o/PZGXUsmZeBsN9yRGkSYHLFG1WaRgWd5HNZ0iEPz+vif95YggRfRVkbjyacq0a4/0E+teEXvcp7LDGswF1wfZhzpNAcqbNpvj8SrNq9YjgMnw89TdSmusDC3ph4yRMp/+M1JPbAf3AOzSH4ztI0GOZ1RtFyvfzyI37qSPiHMkUxXJPVEr0O+ZrBbq8LHLZgf6cgtXIBB+WLh+MVxItSHtqypYlIyPCUiU5b9Rw9HXuHZ7Q43aYHT/C2bxYyQrRl0g4WSekAgZbgesN+A9vhbXCuZ/3DEfWP/F00OL8A4THREw6SgleAGvrCfghVLp6OMQBdwO6PxVg4lLoCzEJyNZwnWq4qPwfS8W3CukIrfCPjB9sTzPg7RlfxiF34KV+macirNcd12bU35Q2d4YEmHar4icZalT2G7K5LFKA4OUL9Yhj8TkzF1pGM2NVc+TS1+jq0zzaU2TWtEYhmlt6zHQAUQ1aYdg5hzmj97iG1+tEw53ueWlXg0HB4gNK1qca2bymEdNramZs+JEfcZq7DL99Jp2HFBvosK0RpwS6Jxx8IK45QPdOkrO71Hz9RFSvGF/vmgcf1osf4R+6NGCo4GzVrcY8PwEJHuvgP0X4OqS03uDvnVk7mq3RWTgE0qg6YHOODEG981VN+x7N67NKQgkOXEVOzam/LleKFA0u0wsoWvxZYr25/w=="};
+const L = "abcd";
+let i = 0, hits = 0, answered = false, fails = [];
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function render(){
+  const it = DATA[i];
+  answered = false;
+  document.getElementById("cnt").textContent = (i+1)+" / "+DATA.length;
+  document.getElementById("barfill").style.width = (i/DATA.length*100)+"%";
+  document.getElementById("score").textContent = hits+(hits===1?" acierto":" aciertos");
+  let h = '<div class="qhead"><span>Pregunta '+(i+1)+'</span><span class="tag">'+it.d+'</span></div>';
+  h += '<p class="q">'+esc(it.q)+'</p>';
+  it.o.forEach((o,k)=>{ h += '<button class="opt" data-k="'+k+'" onclick="pick('+k+')"><b>'+L[k]+')</b><span>'+esc(o)+'</span></button>'; });
+  h += '<div class="why" id="why"></div>';
+  h += '<div class="actions"><button class="btn" id="next" disabled onclick="next()">'+(i<DATA.length-1?"Siguiente":"Ver resultado")+'</button></div>';
+  document.getElementById("stage").innerHTML = h;
+}
+
+function pick(k){
+  if(answered) return; answered = true;
+  const it = DATA[i], btns = document.querySelectorAll(".opt");
+  btns.forEach(b=>b.disabled=true);
+  btns[it.c].classList.add("ok");
+  const why = document.getElementById("why");
+  if(k===it.c){ hits++; why.className="why ok"; why.innerHTML="<b>Correcto.</b> "+esc(it.w); }
+  else { btns[k].classList.add("ko"); fails.push(i); why.className="why ko"; why.innerHTML="<b>Incorrecto. La respuesta correcta es la "+L[it.c]+").</b> "+esc(it.w); }
+  document.getElementById("score").textContent = hits+(hits===1?" acierto":" aciertos");
+  document.getElementById("next").disabled = false;
+}
+
+function next(){ if(i<DATA.length-1){ i++; render(); } else finish(); }
+
+function finish(){
+  document.getElementById("barfill").style.width = "100%";
+  const nota = (hits/DATA.length*10).toFixed(2).replace(".",",");
+  const msg = hits>=Math.ceil(DATA.length*0.85) ? "Excelente. Dominas el tema." : hits>=Math.ceil(DATA.length*0.5) ? "Aprobado. Repasa las preguntas falladas." : "Necesitas repasar el tema.";
+  let h = '<div class="result"><p style="margin:0;color:var(--gris)">Resultado</p><div class="big">'+nota+'</div>';
+  h += '<p><b>'+hits+'</b> aciertos de '+DATA.length+'. '+msg+'</p></div>';
+  if(fails.length){
+    h += '<div class="result"><p style="text-align:left;font-weight:bold;margin-top:18px">Preguntas falladas</p><ul>';
+    fails.forEach(f=>{ const it=DATA[f]; h += '<li><b>'+(f+1)+'.</b> '+esc(it.q)+'<br><span style="color:var(--ok)">Correcta: '+L[it.c]+') '+esc(it.o[it.c])+'</span></li>'; });
+    h += '</ul></div>';
+  }
+  h += '<div class="actions" style="justify-content:center"><button class="btn" onclick="restart()">Repetir el test</button></div>';
+  document.getElementById("stage").innerHTML = h;
+}
+
+function restart(){ i=0; hits=0; fails=[]; render(); }
+
+/* ---- Acceso docente ---- */
+function toggleLock(){ const l=document.getElementById("lock"); l.style.display = l.style.display==="block"?"none":"block"; if(l.style.display==="block") document.getElementById("pw").focus(); }
+function b64(s){ return Uint8Array.from(atob(s), c=>c.charCodeAt(0)); }
+async function unlock(){
+  const msg = document.getElementById("lockmsg"); msg.textContent = "";
+  try{
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(document.getElementById("pw").value), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey({name:"PBKDF2", salt:b64(ENC.s), iterations:250000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64(ENC.i)}, key, b64(ENC.c));
+    document.getElementById("wordbody").innerHTML = new TextDecoder().decode(plain);
+    document.getElementById("pw").value = "";
+    document.getElementById("lock").style.display = "none";
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("foot").style.display = "none";
+    document.getElementById("word").style.display = "block";
+    window.scrollTo(0,0);
+  }catch(e){ msg.textContent = "Contraseña incorrecta."; }
+}
+function closeWord(){
+  document.getElementById("wordbody").innerHTML = "";
+  document.getElementById("word").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  document.getElementById("foot").style.display = "block";
+}
+async function copyWord(){
+  const body = document.getElementById("wordbody"), m = document.getElementById("copymsg");
+  try{
+    await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([body.innerHTML],{type:"text/html"}),"text/plain":new Blob([body.innerText],{type:"text/plain"})})]);
+    m.textContent = "Copiado. Pégalo en Word.";
+  }catch(e){
+    const r = document.createRange(); r.selectNodeContents(body); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    try{ document.execCommand("copy"); m.textContent = "Copiado. Pégalo en Word."; }catch(e2){ m.textContent = "Selecciona el texto y copia con Ctrl+C."; }
+    s.removeAllRanges();
+  }
+}
+function downloadDoc(){
+  const doc = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Arial;font-size:11pt}</style></head><body>'+document.getElementById("wordbody").innerHTML+'</body></html>';
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿",doc],{type:"application/msword"}));
+  a.download = "Test_Decreto_23_2018_Fondo_Mejoras.doc"; document.body.appendChild(a); a.click(); a.remove();
+}
+render();
+</script>
+</body>
+</html>
